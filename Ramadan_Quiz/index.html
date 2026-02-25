@@ -21,35 +21,43 @@
         }
 
         .container {
-            background: rgba(15, 23, 42, 0.75); 
-            backdrop-filter: blur(10px); 
-            -webkit-backdrop-filter: blur(10px);
-            padding: 30px; border-radius: 20px;
+            background: rgba(15, 23, 42, 0.8); 
+            backdrop-filter: blur(8px); 
+            -webkit-backdrop-filter: blur(8px);
+            padding: 15px;
+            border-radius: 15px;
             border: 1px solid rgba(212, 175, 55, 0.3); 
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-            width: 90%; max-width: 450px; text-align: center; color: white;
+            width: 280px;
+            margin: auto;
+            text-align: center; 
+            color: white;
+            box-sizing: border-box;
         }
 
-        .input-group { text-align: right; margin-bottom: 25px; }
+        h1 { font-size: 1.2rem; margin-bottom: 15px; }
+
+        .input-group { text-align: right; margin-bottom: 15px; }
 
         label {
-            display: block; margin-bottom: 15px;
-            font-weight: bold; color: var(--ramadan-light); font-size: 1.1rem;
+            display: block; margin-bottom: 8px;
+            font-weight: bold; color: var(--ramadan-light); font-size: 0.9rem;
         }
 
         input[type="text"] {
-            width: 100%; padding: 12px;
+            width: 100%; padding: 8px;
             border: 1px solid rgba(212, 175, 55, 0.5);
             border-radius: 10px; background: rgba(255, 255, 255, 0.1);
-            color: white; box-sizing: border-box; outline: none;
+            color: white; box-sizing: border-box; outline: none; font-size: 0.9rem;
         }
 
         .mcq-option {
             display: flex; align-items: center;
             background: rgba(255, 255, 255, 0.1); 
-            margin-bottom: 12px; padding: 12px;
+            margin-bottom: 10px; padding: 10px;
             border-radius: 10px; cursor: pointer;
             transition: 0.3s; border: 1px solid transparent;
+            font-size: 0.9rem;
         }
 
         .mcq-option:hover {
@@ -61,10 +69,10 @@
 
         button {
             background: var(--ramadan-gold);
-            color: #0f172a; border: none; padding: 15px;
+            color: #0f172a; border: none; padding: 12px;
             width: 100%; border-radius: 8px;
-            font-weight: bold; font-size: 1.1rem;
-            cursor: pointer; margin-top: 10px; transition: 0.3s;
+            font-weight: bold; font-size: 1rem;
+            cursor: pointer; margin-top: 5px; transition: 0.3s;
         }
 
         button:hover {
@@ -88,17 +96,19 @@
 
         <div class="input-group">
             <label id="question-label"></label>
-            <div id="options-container">
-                </div>
+            <div id="options-container"></div>
         </div>
+
+        <!-- حقل مخفي لإرسال الوقت -->
+        <input type="hidden" name="Timestamp" id="timestamp">
 
         <button type="submit" id="submitBtn">إرسال الإجابة</button>
     </form>
-    <p id="msg" style="margin-top: 15px; font-weight: bold;"></p>
+    <p id="msg" style="margin-top: 15px; font-weight: bold; font-size: 0.8rem;"></p>
 </div>
 
 <script>
-    // 1. مصفوفة الأسئلة السبعة
+
     const questions = [
         { q: "ما هو الشهر الذي يلي شهر رمضان مباشرة؟", options: ["شوال", "شعبان", "ذو القعدة"] },
         { q: "كم عدد سنوات صيام الرسول ﷺ لرمضان؟", options: ["9 سنوات", "7 سنوات", "10 سنوات"] },
@@ -106,18 +116,32 @@
         { q: "ما هي الغزوة التي وقعت في 17 رمضان؟", options: ["بدر", "أحد", "الخندق"] },
         { q: "من هو الصحابي الذي لُقب بسيف الله المسلول؟", options: ["خالد بن الوليد", "حمزة بن عبد المطلب", "عمر بن الخطاب"] },
         { q: "أين ورد ذكر ليلة القدر في القرآن الكريم؟", options: ["سورة القدر", "سورة البقرة", "سورة الإخلاص"] },
-        { q: "ما هو اسم الباب الذي يدخل منه الصائمون الجنة؟", options: ["الريان", "القدس", "السلام"] }
+        { q: "ما هو اسم الباب الذي يدخل منه الصائمون الجنة؟", options: ["الريان", "القدس", "السلام"] },
+        { q: "كم عدد سور القرآن الكريم؟", options: ["114 سورة", "110 سور", "120 سورة"] },
+        { q: "من هو أول مؤذن في الإسلام؟", options: ["بلال بن رباح", "عمار بن ياسر", "أبو بكر الصديق"] },
+        { q: "ما هي أطول سورة في القرآن الكريم؟", options: ["البقرة", "آل عمران", "النساء"] },
+        { q: "كم سجدة تلاوة في القرآن الكريم؟", options: ["15 سجدة", "12 سجدة", "10 سجدات"] },
+        { q: "من هو النبي الذي لُقب بـ 'كليم الله'؟", options: ["موسى عليه السلام", "عيسى عليه السلام", "إبراهيم عليه السلام"] }
     ];
 
-    // 2. منطق تبديل السؤال كل 4 أيام
-    const startDate = new Date("2026-02-25"); // تاريخ بداية المسابقة
+    const startDate = new Date("2026-02-26");
+    startDate.setHours(0, 0, 0, 0);
+
     const today = new Date();
-    const diffDays = Math.floor(Math.abs(today - startDate) / (1000 * 60 * 60 * 24));
-    const qIndex = Math.floor(diffDays / 4) % questions.length;
+    today.setHours(0, 0, 0, 0);
+
+    const diffTime = today.getTime() - startDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    let qIndex = 0;
+    if (diffDays >= 0) {
+        qIndex = Math.floor(diffDays / 2) % questions.length;
+    }
+
     const currentQ = questions[qIndex];
 
-    // عرض السؤال والخيارات في الصفحة
     document.getElementById('question-label').innerText = "سؤال اليوم: " + currentQ.q;
+
     const optionsContainer = document.getElementById('options-container');
     optionsContainer.innerHTML = currentQ.options.map(opt => `
         <label class="mcq-option">
@@ -125,8 +149,6 @@
         </label>
     `).join('');
 
-    // 3. كود ربط الإرسال مع Google Sheets
-    // استبدل الرابط أدناه برابط الـ Web App الخاص بك
     const scriptURL = 'https://script.google.com/macros/s/AKfycbyFH8yBD-lwg6n760zbb-8XDRHhQ1u4jx-BWqMRk5vn6oTr4JecdbrIgX-mvKpuGYmW/exec';
     const form = document.getElementById('ramadan-form');
     const btn = document.getElementById('submitBtn');
@@ -134,6 +156,10 @@
 
     form.addEventListener('submit', e => {
         e.preventDefault();
+
+        // إضافة التاريخ والوقت بصيغة دقيقة
+        document.getElementById("timestamp").value = new Date().toISOString();
+
         btn.disabled = true;
         btn.innerHTML = "جاري الإرسال... ✨";
 
@@ -147,12 +173,12 @@
                 btn.innerHTML = "إرسال الإجابة";
             })
             .catch(error => {
-                console.error('Error!', error.message);
                 alert("حدث خطأ في الاتصال، حاول مرة أخرى.");
                 btn.disabled = false;
                 btn.innerHTML = "إرسال الإجابة";
             });
     });
+
 </script>
 
 </body>
